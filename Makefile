@@ -5,6 +5,7 @@ MOD_DIR := $(shell go env GOMODCACHE)
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
+BUILD_TAG_VERSION := $(shell git describe --abbrev=0 --tags)
 BUILD_BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 BUILD_COMMIT := $(shell git rev-parse HEAD)
 BUILD_TIME := $(shell date '+%Y-%m-%d %H:%M:%S')
@@ -33,10 +34,10 @@ test-coverage: ## Run tests with coverage
 
 # 这里在调用 build 时会先引用 dep 命令
 build: dep ## Build the binary file
-	@go build -ldflags "-s -w -X '${VERSION_PATH}.GIT_BRANCH=${BUILD_BRANCH}' -X '${VERSION_PATH}.GIT_COMMIT=${BUILD_COMMIT}' -X '${VERSION_PATH}.BUILD_TIME=${BUILD_TIME}' -X '${VERSION_PATH}.GO_VERSION=${BUILD_GO_VERSION}'" -o dist/demo-api $(MAIN_FILE)
+	@go build -ldflags "-s -w -X '${VERSION_PATH}.GIT_TAG=${BUILD_TAG_VERSION}' -X '${VERSION_PATH}.GIT_BRANCH=${BUILD_BRANCH}' -X '${VERSION_PATH}.GIT_COMMIT=${BUILD_COMMIT}' -X '${VERSION_PATH}.BUILD_TIME=${BUILD_TIME}' -X '${VERSION_PATH}.GO_VERSION=${BUILD_GO_VERSION}'" -o dist/demo-api $(MAIN_FILE)
 
 linux: dep ## Build the binary file
-	@GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X '${VERSION_PATH}.GIT_BRANCH=${BUILD_BRANCH}' -X '${VERSION_PATH}.GIT_COMMIT=${BUILD_COMMIT}' -X '${VERSION_PATH}.BUILD_TIME=${BUILD_TIME}' -X '${VERSION_PATH}.GO_VERSION=${BUILD_GO_VERSION}'" -o dist/demo-api $(MAIN_FILE)
+	@GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X '${VERSION_PATH}.GIT_TAG=${BUILD_TAG_VERSION}' -X '${VERSION_PATH}.GIT_BRANCH=${BUILD_BRANCH}' -X '${VERSION_PATH}.GIT_COMMIT=${BUILD_COMMIT}' -X '${VERSION_PATH}.BUILD_TIME=${BUILD_TIME}' -X '${VERSION_PATH}.GO_VERSION=${BUILD_GO_VERSION}'" -o dist/demo-api $(MAIN_FILE)
 
 run: # Run Develop server
 	@go run $(MAIN_FILE) start -f etc/demo-api.toml
