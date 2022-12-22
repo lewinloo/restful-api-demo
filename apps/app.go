@@ -58,10 +58,12 @@ func LoadedGinApps() (names []string) {
 
 // 初始化gin路由
 func InitGin(r gin.IRouter) {
+	// 配置每一个ginApp的从IOC获取的服务等
 	for _, v := range ginApps {
 		v.Config()
 	}
 
+	// 初始化gin路由，注册api
 	for _, v := range ginApps {
 		v.Registry(r)
 	}

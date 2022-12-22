@@ -31,4 +31,12 @@ const (
     serial_number
   ) VALUES (?,?,?,?,?,?,?,?);
 `
+
+	QueryHostSQL = `
+  SELECT
+    r.*, h.cpu, h.memory, h.gpu_amount, h.gpu_spec, h.os_type, h.os_name, h.serial_number
+  FROM
+    resource AS r
+    LEFT JOIN host as h ON r.id = h.resource_id
+  `
 )

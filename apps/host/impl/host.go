@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 
+	"github.com/infraboard/mcube/sqlbuilder"
 	"github.com/lewinloo/restful-api-demo/apps/host"
 )
 
@@ -25,7 +26,50 @@ func (h *HostServiceImpl) CreateHost(ctx context.Context, ins *host.Host) (*host
 }
 
 func (h *HostServiceImpl) QueryHost(ctx context.Context, req *host.QueryHostRequest) (*host.HostSet, error) {
-	return nil, nil
+	sqb := sqlbuilder.NewBuilder(QueryHostSQL)
+	if req.Keywords != "" {
+		sqb.Where("r.`name` LIKE ? OR r.description LIKE ? OR r.private_ip LIKE ? OR r.public_ip LIKE ?",
+			"%"+req.Keywords+"%",
+			"%"+req.Keywords+"%",
+			req.Keywords+"%",
+			req.Keywords+"%",
+		)
+	}
+
+	sqb.Limit(req.Offset(), req.GetPageSize())
+	querySql, args := sqb.Build()
+	h.l.Debugf("query sql: %s, args: %v", querySql, args)
+
+	// query stmt, 构造一个Prepare语句
+	stmt, err := h.db.PrepareContext(ctx, querySql)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.QueryContext(ctx, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	set := host.NewHostSet()
+	// 遍历查询数据库的数据
+	for rows.Next() {
+		ins := host.NewHost()
+		// 扫描字段到对象里
+		if err := rows.Scan(&ins.Id, &ins.Vendor, &ins.Region,
+			&ins.CreateAt, &ins.ExpireAt, &ins.Type, &ins.Name,
+			&ins.Description, &ins.Status, &ins.UpdateAt, &ins.SyncAt,
+			&ins.Account, &ins.PublicIP, &ins.PrivateIP,
+			&ins.CPU, &ins.Memory, &ins.GPUAmount, &ins.GPUSpec,
+			&ins.OSType, &ins.OSName, &ins.SerialNumber); err != nil {
+			return nil, err
+		}
+		set.Add(ins)
+	}
+
+	return set, nil
 }
 
 func (h *HostServiceImpl) DescribeHost(ctx context.Context, req *host.QueryHostRequest) (*host.Host, error) {

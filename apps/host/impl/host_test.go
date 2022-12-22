@@ -32,6 +32,20 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+func TestQueryHost(t *testing.T) {
+	should := assert.New(t)
+
+	req := host.NewQueryHostRequest()
+	// req.Keywords = "API"
+
+	set, err := service.QueryHost(context.Background(), req)
+	if should.NoError(err) {
+		for _, v := range set.Items {
+			fmt.Println(v.Id)
+		}
+	}
+}
+
 func init() {
 	err := conf.LoadConfigFromToml("../../../etc/demo.toml")
 	if err != nil {

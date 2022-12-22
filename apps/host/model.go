@@ -10,9 +10,19 @@ var (
 	validate = validator.New()
 )
 
+func NewHostSet() *HostSet {
+	return &HostSet{
+		Items: []*Host{},
+	}
+}
+
 type HostSet struct {
 	Items []*Host `json:"items"`
 	Total int     `json:"total"`
+}
+
+func (h *HostSet) Add(item *Host) {
+	h.Items = append(h.Items, item)
 }
 
 func NewHost() *Host {
@@ -86,7 +96,25 @@ type Describe struct {
 	//SecurityGroups          string `json:"security_groups"`             // 安全组，采用逗号分割
 }
 
+func NewQueryHostRequest() *QueryHostRequest {
+	return &QueryHostRequest{
+		PageSize:   10,
+		PageNumber: 1,
+	}
+}
+
 type QueryHostRequest struct {
+	PageSize   int    `json:"page_size" form:"page_size"`
+	PageNumber int    `json:"page_number" form:"page_number"`
+	Keywords   string `json:"keywords" form:"keywords"`
+}
+
+func (req *QueryHostRequest) Offset() int64 {
+	return int64((req.PageNumber - 1) * req.PageSize)
+}
+
+func (req *QueryHostRequest) GetPageSize() uint {
+	return uint(req.PageSize)
 }
 
 type UpdateHostRequest struct {
