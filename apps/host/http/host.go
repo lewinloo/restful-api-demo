@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/infraboard/mcube/http/response"
@@ -28,13 +27,8 @@ func (h *Handler) createHost(c *gin.Context) {
 
 // 查询 host
 func (h *Handler) queryHost(c *gin.Context) {
-	pageNumber, _ := strconv.Atoi(c.DefaultQuery("page_number", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	kw := c.Query("keywords")
-	req := host.NewQueryHostRequest()
-	req.PageNumber = pageNumber
-	req.PageSize = pageSize
-	req.Keywords = kw
+	// 从 context 中获取参数
+	req := host.NewQueryHostFromContext(c)
 
 	fmt.Printf("page_number: %d, page_size: %d, keywords: %s\n", req.PageNumber, req.PageSize, req.Keywords)
 

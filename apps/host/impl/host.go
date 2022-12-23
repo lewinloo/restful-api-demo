@@ -69,6 +69,18 @@ func (h *HostServiceImpl) QueryHost(ctx context.Context, req *host.QueryHostRequ
 		set.Add(ins)
 	}
 
+	// total 统计
+	countSQL, args := sqb.BuildCount()
+	h.l.Debugf("count sql: %s, args: %v", countSQL, args)
+	cstmt, err := h.db.PrepareContext(ctx, countSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer cstmt.Close()
+	if err := cstmt.QueryRowContext(ctx, args...).Scan(&set.Total); err != nil {
+		return nil, err
+	}
+
 	return set, nil
 }
 

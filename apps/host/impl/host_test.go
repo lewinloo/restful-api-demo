@@ -36,10 +36,11 @@ func TestQueryHost(t *testing.T) {
 	should := assert.New(t)
 
 	req := host.NewQueryHostRequest()
-	// req.Keywords = "API"
+	req.Keywords = "API"
 
 	set, err := service.QueryHost(context.Background(), req)
 	if should.NoError(err) {
+		fmt.Printf("total: %d\n", set.Total)
 		for _, v := range set.Items {
 			fmt.Println(v.Id)
 		}

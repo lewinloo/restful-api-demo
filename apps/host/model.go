@@ -1,8 +1,10 @@
 package host
 
 import (
+	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -17,8 +19,8 @@ func NewHostSet() *HostSet {
 }
 
 type HostSet struct {
-	Items []*Host `json:"items"`
 	Total int     `json:"total"`
+	Items []*Host `json:"items"`
 }
 
 func (h *HostSet) Add(item *Host) {
@@ -94,6 +96,21 @@ type Describe struct {
 	//InternetMaxBandWidthIn  int    `json:"internet_max_band_width_in"`  // 公网入带宽最大值，单位为Mbps
 	//KeyPairName             string `json:"key_pair_name"`               // 私钥对名称
 	//SecurityGroups          string `json:"security_groups"`             // 安全组，采用逗号分割
+}
+
+func NewQueryHostFromContext(c *gin.Context) *QueryHostRequest {
+	pageNumber := c.Query("page_number")
+	pageSize := c.Query("page_size")
+	kw := c.Query("keywords")
+	req := NewQueryHostRequest()
+	if pageNumber != "" {
+		req.PageNumber, _ = strconv.Atoi(pageNumber)
+	}
+	if pageSize != "" {
+		req.PageSize, _ = strconv.Atoi(pageSize)
+	}
+	req.Keywords = kw
+	return req
 }
 
 func NewQueryHostRequest() *QueryHostRequest {
