@@ -40,3 +40,19 @@ func (h *Handler) queryHost(c *gin.Context) {
 
 	response.Success(c.Writer, set)
 }
+
+// 查询 host
+func (h *Handler) describeHost(c *gin.Context) {
+	// 从 context 中获取参数
+	req := host.NewDescribeHostRequestFromContext(c)
+
+	fmt.Printf("id: %s\n", req.Id)
+
+	ins, err := h.svc.DescribeHost(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c.Writer, err)
+		return
+	}
+
+	response.Success(c.Writer, ins)
+}

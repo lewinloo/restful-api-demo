@@ -24,6 +24,7 @@ func (h *Handler) Registry(r gin.IRouter) {
 	{
 		host.POST("", h.createHost)
 		host.GET("", h.queryHost)
+		host.GET("/:id", h.describeHost)
 	}
 }
 
