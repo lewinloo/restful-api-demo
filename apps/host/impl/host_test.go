@@ -50,9 +50,20 @@ func TestQueryHost(t *testing.T) {
 func TestDescribeHost(t *testing.T) {
 	should := assert.New(t)
 
-	req := host.NewDescribeHostRequestWithId("ins-01")
+	req := host.NewIdRequestWithId("ins-01")
 
 	ins, err := service.DescribeHost(context.Background(), req)
+	if should.NoError(err) {
+		fmt.Println(ins.Id, ins.CreateAt, ins.Name)
+	}
+}
+
+func TestDeleteHost(t *testing.T) {
+	should := assert.New(t)
+
+	req := host.NewIdRequestWithId("ins-03")
+
+	ins, err := service.DeleteHost(context.Background(), req)
 	if should.NoError(err) {
 		fmt.Println(ins.Id, ins.CreateAt, ins.Name)
 	}

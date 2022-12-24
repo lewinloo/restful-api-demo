@@ -134,26 +134,22 @@ func (req *QueryHostRequest) GetPageSize() uint {
 	return uint(req.PageSize)
 }
 
-func NewDescribeHostRequestWithId(id string) *DescribeHostRequest {
-	return &DescribeHostRequest{
+func NewIdRequestWithId(id string) *IdRequest {
+	return &IdRequest{
 		Id: id,
 	}
 }
 
-func NewDescribeHostRequestFromContext(c *gin.Context) *DescribeHostRequest {
+func NewIdRequestFromContext(c *gin.Context) *IdRequest {
 	id := c.Param("id")
-	req := NewDescribeHostRequestWithId(id)
+	req := NewIdRequestWithId(id)
 	return req
 }
 
-type DescribeHostRequest struct {
+type IdRequest struct {
 	Id string `json:"id"`
 }
 
 type UpdateHostRequest struct {
 	*Describe
-}
-
-type DeleteHostRequest struct {
-	Id string `json:"id"`
 }

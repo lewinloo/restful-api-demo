@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/infraboard/mcube/sqlbuilder"
 	"github.com/lewinloo/restful-api-demo/apps/host"
@@ -84,7 +85,7 @@ func (h *HostServiceImpl) QueryHost(ctx context.Context, req *host.QueryHostRequ
 	return set, nil
 }
 
-func (h *HostServiceImpl) DescribeHost(ctx context.Context, req *host.DescribeHostRequest) (*host.Host, error) {
+func (h *HostServiceImpl) DescribeHost(ctx context.Context, req *host.IdRequest) (*host.Host, error) {
 	sqb := sqlbuilder.NewBuilder(QueryHostSQL)
 	sqb.Where("r.id = ?", req.Id)
 
@@ -114,6 +115,60 @@ func (h *HostServiceImpl) UpdateHost(ctx context.Context, req *host.UpdateHostRe
 	return nil, nil
 }
 
-func (h *HostServiceImpl) DeleteHost(ctx context.Context, req *host.DeleteHostRequest) (*host.Host, error) {
-	return nil, nil
+func (h *HostServiceImpl) DeleteHost(ctx context.Context, req *host.IdRequest) (*host.Host, error) {
+	var (
+		resStmt  *sql.Stmt
+		descStmt *sql.Stmt
+		err      error
+	)
+
+	ins, err := h.DescribeHost(ctx, host.NewIdRequestWithId(req.Id))
+	if err != nil {
+		return nil, err
+	}
+
+	// 初始化一个事务，如果用户取消了http请求则事务需要回滚
+	tx, err := h.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 如果有err则会滚，没有err则提交事务
+	defer func() {
+		if err != nil {
+			err := tx.Rollback()
+			if err != nil {
+				h.l.Debugf("tx rollback error, %s", err)
+			}
+		} else {
+			err := tx.Commit()
+			if err != nil {
+				h.l.Debugf("tx commit error, %s", err)
+			}
+		}
+	}()
+
+	// 从resource表删除记录
+	resStmt, err = tx.PrepareContext(ctx, DeleteResouceSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer resStmt.Close()
+	_, err = resStmt.ExecContext(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// 从host表删除记录
+	descStmt, err = tx.PrepareContext(ctx, DeleteDescribeSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer descStmt.Close()
+	_, err = descStmt.ExecContext(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return ins, nil
 }
