@@ -1,6 +1,7 @@
 package host
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -50,6 +51,45 @@ func (h *Host) InjectDefault() {
 	if h.CreateAt == 0 {
 		h.CreateAt = time.Now().UnixMilli()
 	}
+}
+
+func (h *Host) Put(res *Resource, desc *Describe) error {
+	if res.Id != h.Id {
+		return fmt.Errorf("id not equal")
+	}
+	*h.Resource = *res
+	*h.Describe = *desc
+	return nil
+}
+
+func (h *Host) Patch(res *Resource, desc *Describe) error {
+	if res.Name != "" {
+		h.Name = res.Name
+	}
+	if desc.CPU != 0 {
+		h.CPU = desc.CPU
+	}
+
+	if res.Vendor != 0 {
+		h.Vendor = res.Vendor
+	}
+
+	if res.Region != "" {
+		h.Region = res.Region
+	}
+
+	if res.ExpireAt != 0 {
+		h.ExpireAt = res.ExpireAt
+	}
+
+	if res.Description != "" {
+		h.Description = res.Description
+	}
+
+	if desc.Memory != 0 {
+		h.Memory = desc.Memory
+	}
+	return nil
 }
 
 type Vendor int
@@ -150,6 +190,34 @@ type IdRequest struct {
 	Id string `json:"id"`
 }
 
+type UPDATE_MODE string
+
+const (
+	// 全量更新
+	UPDATE_MODE_PUT = UPDATE_MODE("put")
+	// 局部更新
+	UPDATE_MODE_PATCH = UPDATE_MODE("patch")
+)
+
+func NewPutUpdateHostRequest(id string) *UpdateHostRequest {
+	host := NewHost()
+	host.Id = id
+	return &UpdateHostRequest{
+		UpdateMode: UPDATE_MODE_PUT,
+		Host:       host,
+	}
+}
+
+func NewPatchUpdateHostRequest(id string) *UpdateHostRequest {
+	host := NewHost()
+	host.Id = id
+	return &UpdateHostRequest{
+		UpdateMode: UPDATE_MODE_PATCH,
+		Host:       host,
+	}
+}
+
 type UpdateHostRequest struct {
-	*Describe
+	UpdateMode UPDATE_MODE `json:"update_mode"`
+	*Host
 }

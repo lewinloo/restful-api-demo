@@ -40,16 +40,16 @@ const (
     LEFT JOIN host as h ON r.id = h.resource_id
   `
 
-  UpdateResourceSQL = `
+	UpdateResourceSQL = `
   UPDATE
     resource
   SET
-    vendor=?,region=?,zone=?,expire_at=?,name=?,description=?
+    vendor=?,region=?,expire_at=?,name=?,description=?
   WHERE
     id = ?;
   `
 
-  UpdateDescribeSQL = `
+	UpdateDescribeSQL = `
   UPDATE
     host
   SET
@@ -58,11 +58,11 @@ const (
     resource_id = ?;
   `
 
-  DeleteResouceSQL = `
+	DeleteResouceSQL = `
   DELETE FROM resource WHERE id = ?;
   `
 
-  DeleteDescribeSQL = `
+	DeleteDescribeSQL = `
   DELETE FROM host WHERE resource_id = ?;
   `
 )

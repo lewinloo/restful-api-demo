@@ -58,6 +58,18 @@ func TestDescribeHost(t *testing.T) {
 	}
 }
 
+func TestUpdateHost(t *testing.T) {
+	should := assert.New(t)
+
+	req := host.NewPatchUpdateHostRequest("ins-02")
+	req.Name = "lewinloo"
+
+	ins, err := service.UpdateHost(context.Background(), req)
+	if should.NoError(err) {
+		fmt.Println(ins.Id, ins.CreateAt, ins.Name)
+	}
+}
+
 func TestDeleteHost(t *testing.T) {
 	should := assert.New(t)
 

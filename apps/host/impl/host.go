@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/infraboard/mcube/sqlbuilder"
 	"github.com/lewinloo/restful-api-demo/apps/host"
@@ -112,7 +113,37 @@ func (h *HostServiceImpl) DescribeHost(ctx context.Context, req *host.IdRequest)
 }
 
 func (h *HostServiceImpl) UpdateHost(ctx context.Context, req *host.UpdateHostRequest) (*host.Host, error) {
-	return nil, nil
+	// 获取已有的对象
+	ins, err := h.DescribeHost(ctx, host.NewIdRequestWithId(req.Id))
+	if err != nil {
+		return nil, err
+	}
+
+	// 根据更新模式，更新对象
+	switch req.UpdateMode {
+	case host.UPDATE_MODE_PUT:
+		if err := ins.Put(req.Resource, req.Describe); err != nil {
+			return nil, err
+		}
+	case host.UPDATE_MODE_PATCH:
+		if err := ins.Patch(req.Resource, req.Describe); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("update_mode only require put/patch")
+	}
+
+	// 检查更新后数据是否合法
+	if err := ins.Validate(); err != nil {
+		return nil, err
+	}
+
+	// 更新数据库里的数据
+	if err := h.update(ctx, ins); err != nil {
+		return nil, err
+	}
+
+	return ins, nil
 }
 
 func (h *HostServiceImpl) DeleteHost(ctx context.Context, req *host.IdRequest) (*host.Host, error) {

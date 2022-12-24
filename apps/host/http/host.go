@@ -72,3 +72,41 @@ func (h *Handler) deleteHost(c *gin.Context) {
 
 	response.Success(c.Writer, ins)
 }
+
+// 更新 put host
+func (h *Handler) putHost(c *gin.Context) {
+	// 从 context 中获取参数
+	req := host.NewPutUpdateHostRequest(c.Param("id"))
+	if err := c.ShouldBindJSON(&req.Host); err != nil {
+		response.Failed(c.Writer, err)
+		return
+	}
+	req.Id = c.Param("id")
+
+	ins, err := h.svc.UpdateHost(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c.Writer, err)
+		return
+	}
+
+	response.Success(c.Writer, ins)
+}
+
+// 更新 patch host
+func (h *Handler) patchHost(c *gin.Context) {
+	// 从 context 中获取参数
+	req := host.NewPatchUpdateHostRequest(c.Param("id"))
+	if err := c.ShouldBindJSON(&req.Host); err != nil {
+		response.Failed(c.Writer, err)
+		return
+	}
+	req.Id = c.Param("id")
+
+	ins, err := h.svc.UpdateHost(c.Request.Context(), req)
+	if err != nil {
+		response.Failed(c.Writer, err)
+		return
+	}
+
+	response.Success(c.Writer, ins)
+}
